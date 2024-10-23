@@ -11,8 +11,9 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
-    private String username;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(unique = true)
     private String accountNumber;
@@ -25,9 +26,9 @@ public class Account {
 
     public Account() {}
 
-    public Account(Long id, String username, String accountNumber, BigDecimal balance, Status status) {
+    public Account(Long id, User user, String accountNumber, BigDecimal balance, Status status) {
         this.id = id;
-        this.username = username;
+        this.user = user;
         this.accountNumber = accountNumber;
         this.balance = balance;
         this.status = status;
@@ -41,12 +42,12 @@ public class Account {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public User getUser() {
+        return user;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getAccountNumber() {
@@ -58,11 +59,13 @@ public class Account {
     }
 
     public BigDecimal getBalance() {
-        return balance;
+        // When retrieving the balance, convert it from kobo to the actual balance by dividing by 100
+        return balance != null ? balance.divide(BigDecimal.valueOf(100)) : BigDecimal.ZERO;
     }
 
     public void setBalance(BigDecimal balance) {
-        this.balance = balance;
+        // When setting the balance, convert it to kobo by multiplying by 100
+        this.balance = balance != null ? balance.multiply(BigDecimal.valueOf(100)) : BigDecimal.ZERO;
     }
 
     public Status getStatus() {

@@ -1,13 +1,13 @@
 package com.kayode.paymentservice.repository;
 
-import com.kayode.paymentservice.model.Transaction;
-
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.kayode.paymentservice.model.User;
+
 @Repository
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    Optional<Transaction> findByTransactionRef(String ref);
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUsername(String username);
 }
