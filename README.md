@@ -83,30 +83,72 @@ Response:
 }
 ```
 
-#### Get Transaction Status
+#### 3. Get Transaction Status - By Id or transactionRef
 ```json
-GET /transactions/789
+GET /api/v1/transactions/1
+GET /api/v1/transactions/172971161398621653429
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 Response:
 {
-    "transactionId": "789",
-    "senderAccountId": "123",
-    "receiverAccountId": "456",
-    "amount": 100.00,
-    "status": "COMPLETED",
-    "timestamp": "2024-10-23T10:30:00Z"
+   "status": true,
+   "message": "Transaction found",
+   "data": {
+      "id": 1,
+      "transactionRef": "172971060536521344565",
+      "amount": 2000.00,
+      "timestamp": "2024-10-23T20:10:05.366206",
+      "status": "COMPLETED",
+      "sender_id": 2,
+      "receiver_id": 1
+   }
 }
 ```
 
-#### Get Account Balance
+#### 4. Get Accounts 
+###### If authenticated user is ADMIN, all accounts are returned else only authenticated user's account(s) are returned.
 ```json
-GET /accounts/123
+GET /api/v1/accounts
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        
+Response:
+{
+   "status": true,
+   "message": "Account(s) fetched successfully",
+   "data": [
+      {
+         "id": 1,
+         "user": {
+         "fullName": "femi",
+         "username": "femi"
+      },
+      "accountNumber": "1000012345",
+      "balance": 100002000.00,
+      "status": "ACTIVE"
+      }
+   ]
+}
+```
+
+#### 5. Get Account by id
+```json
+GET /api/v1/accounts/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 Response:
 {
-    "accountId": "123",
-    "balance": 900.00,
-    "currency": "USD"
+   "status": true,
+   "message": "Account(s) fetched successfully",
+   "data": {
+      "id": 1,
+      "user": {
+        "fullName": "femi",
+        "username": "femi"
+      },
+      "accountNumber": "1000012345",
+      "balance": 100000000.00,
+      "status": "ACTIVE"
+   }
 }
 ```
 
@@ -115,26 +157,30 @@ Response:
 ### Accounts Table
 ```sql
 CREATE TABLE accounts (
-    id BIGINT PRIMARY KEY,
-    balance DECIMAL(19,2) NOT NULL,
-    currency VARCHAR(3) NOT NULL,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
+     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+     user_id BIGINT,                           -- Foreign key referencing the user
+     accountNumber VARCHAR(255) UNIQUE NOT NULL,
+     balance DECIMAL(19, 2),                   -- Balance in decimal form with precision
+     status VARCHAR(255),                      -- Enum type status
+     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
 ```
 
 ### Transactions Table
 ```sql
 CREATE TABLE transactions (
-    id BIGINT PRIMARY KEY,
-    sender_account_id BIGINT,
-    receiver_account_id BIGINT,
-    amount DECIMAL(19,2) NOT NULL,
-    status VARCHAR(20) NOT NULL,
-    created_at TIMESTAMP,
-    FOREIGN KEY (sender_account_id) REFERENCES accounts(id),
-    FOREIGN KEY (receiver_account_id) REFERENCES accounts(id)
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    transaction_ref VARCHAR(255),               -- Transaction reference
+    sender_id BIGINT,                           -- Foreign key referencing sender account
+    receiver_id BIGINT,                         -- Foreign key referencing receiver account
+    amount DECIMAL(19, 2),                      -- Amount in decimal form
+    timestamp TIMESTAMP,                        -- Timestamp for the transaction
+    status VARCHAR(255),                        -- Enum type status
+    CONSTRAINT fk_sender FOREIGN KEY (sender_id) REFERENCES accounts(id), -- Sender account reference
+    CONSTRAINT fk_receiver FOREIGN KEY (receiver_id) REFERENCES accounts(id) -- Receiver account reference
 );
+
 ```
 
 ## Security
@@ -154,27 +200,16 @@ The application returns appropriate HTTP status codes:
 - 404: Resource not found
 - 500: Internal server error
 
-Error response format:
-```json
-{
-    "timestamp": "2024-10-23T10:30:00Z",
-    "status": 400,
-    "error": "Bad Request",
-    "message": "Insufficient funds in sender account",
-    "path": "/payments"
-}
-```
-
 ## Running the Application
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/payment-processing-system.git
+git clone https://github.com/kayusgold/assignment-payment-service-api.git
 ```
 
 2. Navigate to the project directory:
 ```bash
-cd payment-processing-system
+cd assignment-payment-service-api
 ```
 
 3. Build the project:

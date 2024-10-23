@@ -82,7 +82,7 @@ public class PaymentService {
         Optional<Transaction> transaction = Optional.empty();
     
         // Check if transactionId is numeric
-        if (transactionId.matches("\\d+")) {
+        if (transactionId.matches("\\d+") && transactionId.length() < 21) {
             // Parse it as Long
             Long idAsLong = Long.parseLong(transactionId);
             

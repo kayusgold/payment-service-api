@@ -72,8 +72,14 @@ public class PaymentController {
     }
     
     @GetMapping("/accounts/{accountId}")
-    public ResponseEntity<Account> getAccountBalance(@PathVariable @Positive(message = "Account ID must be a positive number") Long accountId) {
+    public ResponseEntity<?> getAccountBalance(@PathVariable @Positive(message = "Account ID must be a positive number") Long accountId) {
         Account account = paymentService.getAccountBalance(accountId);
-        return ResponseEntity.ok(account);
+
+        CustomResponse<Object> response = new CustomResponse<>();
+        response.setStatus(true);
+        response.setMessage("Account(s) fetched successfully");
+        response.setData(account);
+
+        return ResponseEntity.ok(response);
     }
 }

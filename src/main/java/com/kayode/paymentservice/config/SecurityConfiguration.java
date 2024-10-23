@@ -13,7 +13,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -21,8 +20,8 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     public SecurityConfiguration(
-        JwtAuthenticationFilter jwtAuthenticationFilter,
-        AuthenticationProvider authenticationProvider
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            AuthenticationProvider authenticationProvider
     ) {
         this.authenticationProvider = authenticationProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -30,18 +29,22 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
-                .authorizeHttpRequests()
-                .requestMatchers("/api/v1/authenticate")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                // .permitAll()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+        http
+                // Disable CSRF for H2 console
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**", "/h2/**")
+                        .disable())
+                // Configure frame options to allow H2 console
+                .headers(headers -> headers
+                        .frameOptions()
+                        .sameOrigin())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/authenticate", "/h2-console/**", "/h2/**", "/doc/**", "/favicon.ico")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -53,12 +56,11 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of("http://localhost:8080"));
-        configuration.setAllowedMethods(List.of("GET","POST"));
-        configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
+        configuration.setAllowedMethods(List.of("GET", "POST"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**",configuration);
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }
