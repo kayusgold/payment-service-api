@@ -37,16 +37,28 @@ public class PaymentService {
 
     @Transactional
     public Transaction processPayment(String receiverAccountNumber, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+        
         User senderUser = authenticationService.getAuthenticatedUser();
         Account sender = accountRepository.findByAccountNumber(senderUser.getAccountNumber());
         Account receiver = accountRepository.findByAccountNumber(receiverAccountNumber);
 
-        if (sender == null || receiver == null) {
-            throw new IllegalArgumentException("Invalid account numbers");
+        if (sender == null) {
+            throw new IllegalArgumentException("Invalid sender account number");
         }
 
-        if(sender.getStatus().equals(Status.PND) || sender.getStatus().equals(Status.INACTIVE)) {
-            throw new IllegalArgumentException("Sender account is " + (sender.getStatus().equals(Status.PND) ? "on PND" : "inactive"));
+        if(sender.getStatus().equals(Status.PND)) {
+            throw new IllegalArgumentException("Sender account is on PND");
+        }
+
+        if(sender.getStatus().equals(Status.INACTIVE)) {
+            throw new IllegalArgumentException("Sender account is inactive");
+        }
+
+        if (receiver == null) {
+            throw new IllegalArgumentException("Invalid receiver account number");
         }
 
         if(sender.equals(receiver)) {
@@ -102,7 +114,7 @@ public class PaymentService {
     
         // If still not found, throw exception
         if (!transaction.isPresent()) {
-            throw new RuntimeException("Invalid transaction ID or reference");
+            throw new RuntimeException("Invalid transaction ID or reference. Transaction not found.");
         }
     
         return transaction.get();
@@ -112,7 +124,7 @@ public class PaymentService {
         // Get the authenticated user
         User user = this.authenticationService.getAuthenticatedUser();
 
-        if(user.getRole().equals(Role.ROLE_ADMIN)) {
+        if(user.getRole().equals(Role.ROLE_ADMIN) || user.getRole().equals("ROLE_ADMIN")) { //these two checks were added because using Basic Auth, Role is a String and not ENUM
             //get all accounts
             return this.accountRepository.findAll();
         } else {
@@ -133,7 +145,7 @@ public class PaymentService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid account ID"));
     }
 
-    private String generateTransactionRef(Long senderId, Long receiverId) {
+    protected String generateTransactionRef(Long senderId, Long receiverId) {
         // Get the current timestamp in milliseconds
         String timestamp = String.valueOf(System.currentTimeMillis());
         

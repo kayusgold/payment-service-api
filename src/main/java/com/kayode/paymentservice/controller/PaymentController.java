@@ -48,14 +48,22 @@ public class PaymentController {
 
     @GetMapping("/transactions/{transactionId}")
     public ResponseEntity<?> getTransactionStatus(@PathVariable @Pattern(regexp = "\\d+", message = "Transaction ID must be a positive number or a string of digits") String transactionId) {
-        Transaction transaction = paymentService.getTransactionStatus(transactionId);
+        try {
+            Transaction transaction = paymentService.getTransactionStatus(transactionId);
 
-        CustomResponse<Object> response = new CustomResponse<>();
-        response.setStatus(true);
-        response.setMessage("Transaction found");
-        response.setData(transaction);
+            CustomResponse<Object> response = new CustomResponse<>();
+            response.setStatus(true);
+            response.setMessage("Transaction found");
+            response.setData(transaction);
 
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            CustomResponse<Object> response = new CustomResponse<>();
+            response.setStatus(false);
+            response.setMessage("Error: " + e.getMessage());
+
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 
     @GetMapping("/accounts")
@@ -80,13 +88,21 @@ public class PaymentController {
     
     @GetMapping("/accounts/{accountId}")
     public ResponseEntity<?> getAccountBalance(@PathVariable @Positive(message = "Account ID must be a positive number") Long accountId) {
-        Account account = paymentService.getAccountBalance(accountId);
+        try {
+            Account account = paymentService.getAccountBalance(accountId);
 
-        CustomResponse<Object> response = new CustomResponse<>();
-        response.setStatus(true);
-        response.setMessage("Account(s) fetched successfully");
-        response.setData(account);
+            CustomResponse<Object> response = new CustomResponse<>();
+            response.setStatus(true);
+            response.setMessage("Account fetched successfully");
+            response.setData(account);
 
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            CustomResponse<Object> response = new CustomResponse<>();
+            response.setStatus(false);
+            response.setMessage("Account fetching failed. Error: " + e.getMessage());
+
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 }
