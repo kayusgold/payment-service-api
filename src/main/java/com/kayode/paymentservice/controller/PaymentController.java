@@ -25,18 +25,25 @@ public class PaymentController {
 
     @PostMapping("/payments")
     public ResponseEntity<CustomResponse<Object>> processPayment(@Valid @RequestBody PaymentRequestDto paymentRequestDto) {
-        Transaction transaction = paymentService.processPayment(
-                paymentRequestDto.getSenderAccountNumber(),
-                paymentRequestDto.getReceiverAccountNumber(),
-                paymentRequestDto.getAmount()
-        );
+        try {
+            Transaction transaction = paymentService.processPayment(
+                    paymentRequestDto.getReceiverAccountNumber(),
+                    paymentRequestDto.getAmount()
+            );
 
-        CustomResponse<Object> response = new CustomResponse<>();
-        response.setStatus(true);
-        response.setMessage("Transaction successful");
-        response.setData(transaction);
+            CustomResponse<Object> response = new CustomResponse<>();
+            response.setStatus(true);
+            response.setMessage("Transaction successful");
+            response.setData(transaction);
 
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            CustomResponse<Object> response = new CustomResponse<>();
+            response.setStatus(false);
+            response.setMessage("Error: " + e.getMessage());
+
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 
     @GetMapping("/transactions/{transactionId}")

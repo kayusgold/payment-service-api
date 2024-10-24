@@ -2,51 +2,73 @@ package com.kayode.paymentservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-    private final AuthenticationProvider authenticationProvider;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfiguration(
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            AuthenticationProvider authenticationProvider
-    ) {
-        this.authenticationProvider = authenticationProvider;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    private final SecurityProperties securityProperties;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    public SecurityConfiguration(SecurityProperties securityProperties) {
+        this.securityProperties = securityProperties;
+        this.passwordEncoder = new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService() {
+        // Create admin user
+        UserDetails admin = User.builder()
+                .username(securityProperties.getAdmin().getUsername())
+                .password(passwordEncoder.encode(securityProperties.getAdmin().getPassword()))
+                .roles(securityProperties.getAdmin().getRole().replace("ROLE_", ""))
+                .build();
+
+        // Create user1
+        UserDetails user1 = User.builder()
+                .username(securityProperties.getUser1().getUsername())
+                .password(passwordEncoder.encode(securityProperties.getUser1().getPassword()))
+                .roles(securityProperties.getUser1().getRole().replace("ROLE_", ""))
+                .build();
+
+        // Create user2
+        UserDetails user2 = User.builder()
+                .username(securityProperties.getUser2().getUsername())
+                .password(passwordEncoder.encode(securityProperties.getUser2().getPassword()))
+                .roles(securityProperties.getUser2().getRole().replace("ROLE_", ""))
+                .build();
+
+        return new InMemoryUserDetailsManager(admin, user1, user2);
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF for H2 console
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers("/h2-console/**", "/h2/**")
                         .disable())
-                // Configure frame options to allow H2 console
                 .headers(headers -> headers
-                        .frameOptions()
-                        .sameOrigin())
+                        .frameOptions(frameOptions -> frameOptions.disable()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/authenticate", "/h2-console/**", "/h2/**", "/doc/**", "/favicon.ico")
+                        .requestMatchers("/h2-console/**", "/h2/**", "/doc/**", "/favicon.ico")
                         .permitAll()
                         .anyRequest()
                         .authenticated())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .httpBasic(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         return http.build();
     }
@@ -63,5 +85,10 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
+    }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

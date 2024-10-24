@@ -5,9 +5,9 @@ import java.math.BigDecimal;
 
 public class PaymentRequestDto {
 
-    @NotBlank(message = "Sender account number is required")
-    @Pattern(regexp = "\\d{10}", message = "Sender account number must be a 10-digit number")
-    private String senderAccountNumber;
+//    @NotBlank(message = "Sender account number is required")
+//    @Pattern(regexp = "\\d{10}", message = "Sender account number must be a 10-digit number")
+//    private String senderAccountNumber;
 
     @NotBlank(message = "Receiver account number is required")
     @Pattern(regexp = "\\d{10}", message = "Receiver account number must be a 10-digit number")
@@ -18,13 +18,13 @@ public class PaymentRequestDto {
     private BigDecimal amount;
 
     // Getters and Setters
-    public String getSenderAccountNumber() {
-        return senderAccountNumber;
-    }
-
-    public void setSenderAccountNumber(String senderAccountNumber) {
-        this.senderAccountNumber = senderAccountNumber;
-    }
+//    public String getSenderAccountNumber() {
+//        return senderAccountNumber;
+//    }
+//
+//    public void setSenderAccountNumber(String senderAccountNumber) {
+//        this.senderAccountNumber = senderAccountNumber;
+//    }
 
     public String getReceiverAccountNumber() {
         return receiverAccountNumber;

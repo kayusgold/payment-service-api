@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import com.kayode.paymentservice.model.User;
 
-@Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByUsername(String username);
-}
+//@Repository
+//public interface UserRepository extends JpaRepository<User, Long> {
+//    Optional<User> findByUsername(String username);
+//}

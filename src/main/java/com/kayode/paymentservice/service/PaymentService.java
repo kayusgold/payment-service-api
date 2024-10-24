@@ -36,8 +36,9 @@ public class PaymentService {
     }
 
     @Transactional
-    public Transaction processPayment(String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) {
-        Account sender = accountRepository.findByAccountNumber(senderAccountNumber);
+    public Transaction processPayment(String receiverAccountNumber, BigDecimal amount) {
+        User senderUser = authenticationService.getAuthenticatedUser();
+        Account sender = accountRepository.findByAccountNumber(senderUser.getAccountNumber());
         Account receiver = accountRepository.findByAccountNumber(receiverAccountNumber);
 
         if (sender == null || receiver == null) {
@@ -116,7 +117,7 @@ public class PaymentService {
             return this.accountRepository.findAll();
         } else {
             //get account details
-            Optional<Account> account = this.accountRepository.findByUser(user);
+            Optional<Account> account = this.accountRepository.findByUsername(user.getUsername());
 
             if(account.isPresent()) {
                 return List.of(account.get());

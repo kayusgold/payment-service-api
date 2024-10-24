@@ -1,63 +1,68 @@
 package com.kayode.paymentservice.service;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import com.kayode.paymentservice.dto.AuthenticationRequestDto;
+import com.kayode.paymentservice.config.SecurityProperties;
 import com.kayode.paymentservice.model.User;
-import com.kayode.paymentservice.repository.UserRepository;
 
 @Service
 public class AuthenticationService {
-    private final UserRepository userRepository;
-    
-    private final AuthenticationManager authenticationManager;
+    private final SecurityProperties securityProperties;
 
-    public AuthenticationService(
-        UserRepository userRepository,
-        AuthenticationManager authenticationManager
-    ) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
+    public AuthenticationService(SecurityProperties securityProperties) {
+        this.securityProperties = securityProperties;
     }
 
-    public User authenticate(AuthenticationRequestDto input) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        input.getUsername(),
-                        input.getPassword()
-                )
-        );
-
-        return userRepository.findByUsername(input.getUsername())
-                .orElseThrow();
-    }
-
-    public User getAuthenticatedUser() throws RuntimeException {
-        // Get the authenticated user
+    public User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    
-        // Check if user is authenticated
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+
+        if (authentication == null || !authentication.isAuthenticated() ||
+                "anonymousUser".equals(authentication.getPrincipal())) {
             throw new RuntimeException("No authenticated user found");
         }
-    
-        // Extract username from principal (could be username or UserDetails)
-        Object principal = authentication.getPrincipal();
-        String username;
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else {
-            username = principal.toString();
-        }
-    
-        // Fetch the user from the database
-        return userRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String username = extractUsername(authentication);
+        return findUserByUsername(username);
     }
-    
+
+    private String extractUsername(Authentication authentication) {
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
+        }
+        return principal.toString();
+    }
+
+    private User findUserByUsername(String username) {
+        // Check admin
+        if (username.equals(securityProperties.getAdmin().getUsername())) {
+            return User.builder()
+                    .username(securityProperties.getAdmin().getUsername())
+                    .role(securityProperties.getAdmin().getRole())
+                    .build();
+        }
+
+        // Check user1
+        if (username.equals(securityProperties.getUser1().getUsername())) {
+            return User.builder()
+                    .username(securityProperties.getUser1().getUsername())
+                    .role(securityProperties.getUser1().getRole())
+                    .accountNumber(securityProperties.getUser1().getAccountNumber())
+                    .build();
+        }
+
+        // Check user2
+        if (username.equals(securityProperties.getUser2().getUsername())) {
+            return User.builder()
+                    .username(securityProperties.getUser2().getUsername())
+                    .role(securityProperties.getUser2().getRole())
+                    .accountNumber(securityProperties.getUser2().getAccountNumber())
+                    .build();
+        }
+
+        throw new RuntimeException("User not found: " + username);
+    }
 }

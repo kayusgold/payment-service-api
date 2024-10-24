@@ -7,7 +7,7 @@ A Spring Boot application that simulates a simple payment processing system, all
 - Process payments between accounts
 - Check transaction status
 - Retrieve account balances
-- Secure API endpoints with JWT Authentication
+- Secure API endpoints with Basic Authentication
 - In-memory H2 database for data storage
 - Input validation and error handling
 
@@ -26,7 +26,6 @@ A Spring Boot application that simulates a simple payment processing system, all
 ### Payment Operations
 
 ```
-POST /api/v1/authenticate
 POST /api/v1/payments
 GET /api/v1/transactions/{transactionId}
 GET /api/v1/accounts/{accountId}
@@ -34,33 +33,12 @@ GET /api/v1/accounts/{accountId}
 
 ### Request/Response Examples
 
-#### 1. Authentication
-```json
-POST /api/v1/authenticate
-{
-    "username": "femi",
-    "password": "1234user"
-}
-```
-
-Response
-```json
-{
-    "status": true,
-    "message": "Login successful",
-    "data": {
-        "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmZW1pIiwiaWF0IjoxNzI5NjgzMzc2LCJleHAiOjE3Mjk2ODY5NzZ9.nZFDV8frey4n-FI3TkaUg8yfPTEUrwn02xOR8t_eAA4"
-    }
-}
-```
-
-#### 2. Process Payment
+#### 1. Process Payment
 ```json
 POST /api/v1/payments
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Authorization: ZmVtaToxMjM0dXNlcg==
 
 {
-    "senderAccountNumber": "2000012345",
     "receiverAccountNumber": "1000012345",
     "amount": 2000.0
 }
@@ -83,11 +61,11 @@ Response:
 }
 ```
 
-#### 3. Get Transaction Status - By Id or transactionRef
+#### 2. Get Transaction Status - By Id or transactionRef
 ```json
 GET /api/v1/transactions/1
 GET /api/v1/transactions/172971161398621653429
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Authorization: Basic ZmVtaToxMjM0dXNlcg==
 
 Response:
 {
@@ -105,11 +83,11 @@ Response:
 }
 ```
 
-#### 4. Get Accounts 
+#### 3. Get Accounts 
 ###### If authenticated user is ADMIN, all accounts are returned else only authenticated user's account(s) are returned.
 ```json
 GET /api/v1/accounts
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Authorization: Basic ZmVtaToxMjM0dXNlcg==
         
 Response:
 {
@@ -130,10 +108,10 @@ Response:
 }
 ```
 
-#### 5. Get Account by id
+#### 4. Get Account by id
 ```json
 GET /api/v1/accounts/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Authorization: Basic ZmVtaToxMjM0dXNlcg==
 
 Response:
 {
@@ -187,8 +165,9 @@ CREATE TABLE transactions (
 
 - Basic Authentication is implemented using Spring Security
 - Default users are configured in memory:
-  - Username: `admin` / Password: `admin` (ADMIN role)
-  - Username: `user` / Password: `user` (USER role)
+  - Username: `kay` / Password: `1234admin` (ADMIN role)
+  - Username: `femi` / Password: `1234user` (USER role)
+  - Username: `tola` / Password: `1234user` (USER role)
 
 ## Error Handling
 
