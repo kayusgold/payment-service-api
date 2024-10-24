@@ -37,18 +37,24 @@ public class DBSeeder {
     CommandLineRunner run() {
         return args -> {
 
-            Account user1 = new Account();
-            user1.setUsername(user1Username);
-            user1.setAccountNumber(user1AccountNumber);
-            user1.setBalance(BigDecimal.valueOf(100_000_000));
-            user1.setStatus(Status.ACTIVE);
-            Account user2 = new Account();
-            user2.setUsername(user2Username);
-            user2.setAccountNumber(user2AccountNumber);
-            user2.setBalance(BigDecimal.valueOf(100_000_000));
-            user2.setStatus(Status.ACTIVE);
-            accountRepository.save(user1);
-            accountRepository.save(user2);
+            // Check if accounts already exist
+            if (!accountRepository.existsByAccountNumber(user1AccountNumber)) {
+                Account user1 = new Account();
+                user1.setUsername(user1Username);
+                user1.setAccountNumber(user1AccountNumber);
+                user1.setBalance(BigDecimal.valueOf(100_000_000));
+                user1.setStatus(Status.ACTIVE);
+                accountRepository.save(user1);
+            }
+
+            if (!accountRepository.existsByAccountNumber(user2AccountNumber)) {
+                Account user2 = new Account();
+                user2.setUsername(user2Username);
+                user2.setAccountNumber(user2AccountNumber);
+                user2.setBalance(BigDecimal.valueOf(100_000_000));
+                user2.setStatus(Status.ACTIVE);
+                accountRepository.save(user2);
+            }
         };
     }
 }

@@ -5,6 +5,9 @@ import com.kayode.paymentservice.dto.PaymentRequestDto;
 import com.kayode.paymentservice.model.Account;
 import com.kayode.paymentservice.model.Transaction;
 import com.kayode.paymentservice.service.PaymentService;
+
+import jakarta.transaction.Transactional;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,6 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
+@Transactional
 @AutoConfigureMockMvc
 class PaymentControllerIntegrationTest {
 
