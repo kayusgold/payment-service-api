@@ -36,7 +36,7 @@ GET /api/v1/accounts/{accountId}
 #### 1. Process Payment
 ```json
 POST /api/v1/payments
-Authorization: ZmVtaToxMjM0dXNlcg==
+Authorization: Basic ZmVtaToxMjM0dXNlcg==
 
 {
     "receiverAccountNumber": "1000012345",
