@@ -215,6 +215,47 @@ The project includes:
 - Integration tests for REST endpoints
 - Repository layer tests
 
+
+## CI/CD and Docker
+
+### GitHub Actions CI
+
+This project uses GitHub Actions for Continuous Integration. The workflow does the following:
+
+1. Builds the project
+2. Runs tests
+3. Builds the application
+
+You can find the workflow configuration in the `.github/workflows/ci.yml` file.
+
+### Docker
+
+#### Prerequisites
+
+1. Install Docker Desktop:
+   - For Windows and Mac: [Docker Desktop](https://www.docker.com/products/docker-desktop)
+   - For Linux: [Docker Engine](https://docs.docker.com/engine/install/)
+
+2. Ensure Docker is running on your machine.
+
+#### Running with Docker Compose
+
+1. Navigate to the project root directory.
+
+2. Run the following command to start the application:
+
+```bash
+docker-compose up
+```
+
+This command will build the Docker image (if not already built) and start the container. The application will be available at `http://localhost:8080`.
+
+3. To stop the application, use:
+
+```bash
+docker-compose down
+```
+
 ## Development Guidelines
 
 1. **Transaction Management**
@@ -234,7 +275,6 @@ The project includes:
 
 ## Future Improvements
 
-- Implement JWT authentication
 - Add support for multiple currencies
 - Implement transaction history
 - Add pagination for transaction listing

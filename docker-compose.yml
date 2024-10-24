@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  payment-service:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    volumes:
+      - ./logs:/logs
+      - ./src/main/resources/application.properties:/app/application.properties
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  h2:
+    image: oscarfonts/h2:latest
+    ports:
+      - "1521:1521"
+      - "81:81"
+    environment:
+      - H2_OPTIONS=-ifNotExists
+    volumes:
+      - ./h2-data:/h2-data
