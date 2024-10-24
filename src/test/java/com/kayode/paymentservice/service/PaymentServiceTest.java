@@ -47,29 +47,29 @@ class PaymentServiceTest {
     void processPayment_SuccessfulTransaction() {
         // Arrange
         User senderUser = new User();
-        senderUser.setAccountNumber("1234567890");
+        senderUser.setAccountNumber("1111111111");
 
         Account sender = new Account();
         sender.setId(1L);
-        sender.setAccountNumber("1234567890");
+        sender.setAccountNumber("1111111111");
         sender.setBalance(new BigDecimal("1000.00"));
         sender.setStatus(Status.ACTIVE);
 
         Account receiver = new Account();
         receiver.setId(2L);
-        receiver.setAccountNumber("0987654321");
+        receiver.setAccountNumber("2222222222");
         receiver.setBalance(new BigDecimal("500.00"));
         receiver.setStatus(Status.ACTIVE);
 
         BigDecimal amount = new BigDecimal("100.00");
 
         when(authenticationService.getAuthenticatedUser()).thenReturn(senderUser);
-        when(accountRepository.findByAccountNumber("1234567890")).thenReturn(sender);
-        when(accountRepository.findByAccountNumber("0987654321")).thenReturn(receiver);
+        when(accountRepository.findByAccountNumber("1111111111")).thenReturn(sender);
+        when(accountRepository.findByAccountNumber("2222222222")).thenReturn(receiver);
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArguments()[0]);
 
         // Act
-        Transaction result = paymentService.processPayment("0987654321", amount);
+        Transaction result = paymentService.processPayment("2222222222", amount);
 
         // Assert
         assertNotNull(result);
@@ -85,26 +85,26 @@ class PaymentServiceTest {
     void processPayment_InsufficientFunds() {
         // Arrange
         User senderUser = new User();
-        senderUser.setAccountNumber("1234567890");
+        senderUser.setAccountNumber("3333333333");
 
         Account sender = new Account();
-        sender.setAccountNumber("1234567890");
+        sender.setAccountNumber("3333333333");
         sender.setBalance(new BigDecimal("50.00"));
         sender.setStatus(Status.ACTIVE);
 
         Account receiver = new Account();
-        receiver.setAccountNumber("0987654321");
+        receiver.setAccountNumber("4444444444");
         receiver.setBalance(new BigDecimal("500.00"));
         receiver.setStatus(Status.ACTIVE);
 
         BigDecimal amount = new BigDecimal("100.00");
 
         when(authenticationService.getAuthenticatedUser()).thenReturn(senderUser);
-        when(accountRepository.findByAccountNumber("1234567890")).thenReturn(sender);
-        when(accountRepository.findByAccountNumber("0987654321")).thenReturn(receiver);
+        when(accountRepository.findByAccountNumber("3333333333")).thenReturn(sender);
+        when(accountRepository.findByAccountNumber("4444444444")).thenReturn(receiver);
 
         // Act & Assert
-        assertThrows(IllegalStateException.class, () -> paymentService.processPayment("0987654321", amount));
+        assertThrows(IllegalStateException.class, () -> paymentService.processPayment("4444444444", amount));
         verify(accountRepository, never()).save(any(Account.class));
         verify(transactionRepository, never()).save(any(Transaction.class));
     }
@@ -113,21 +113,21 @@ class PaymentServiceTest {
     void processPayment_SenderAndReceiverSame_ThrowsException() {
         // Arrange
         User senderUser = new User();
-        senderUser.setAccountNumber("1234567890");
+        senderUser.setAccountNumber("5555555555");
 
         Account account = new Account();
-        account.setAccountNumber("1234567890");
+        account.setAccountNumber("5555555555");
         account.setBalance(new BigDecimal("1000.00"));
         account.setStatus(Status.ACTIVE);
 
         BigDecimal amount = new BigDecimal("100.00");
 
         when(authenticationService.getAuthenticatedUser()).thenReturn(senderUser);
-        when(accountRepository.findByAccountNumber("1234567890")).thenReturn(account);
+        when(accountRepository.findByAccountNumber("5555555555")).thenReturn(account);
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> paymentService.processPayment("1234567890", amount));
+                () -> paymentService.processPayment("5555555555", amount));
         assertEquals("Sender and Recipient can't be the same.", exception.getMessage());
     }
 
@@ -311,10 +311,14 @@ class PaymentServiceTest {
         // Arrange
         User adminUser = new User();
         adminUser.setUsername("admin");
-        adminUser.setRole("ROLE_ADMIN");  // Set the role
+        adminUser.setRole("ROLE_ADMIN");
         when(authenticationService.getAuthenticatedUser()).thenReturn(adminUser);
 
-        List<Account> mockAccounts = Arrays.asList(new Account(), new Account());
+        Account account1 = new Account();
+        account1.setAccountNumber("6666666666");
+        Account account2 = new Account();
+        account2.setAccountNumber("7777777777");
+        List<Account> mockAccounts = Arrays.asList(account1, account2);
         when(accountRepository.findAll()).thenReturn(mockAccounts);
 
         // Act
@@ -330,11 +334,12 @@ class PaymentServiceTest {
         // Arrange
         User regularUser = new User();
         regularUser.setUsername("user1");
-        regularUser.setRole("ROLE_USER");  // Set the role
+        regularUser.setRole("ROLE_USER");
         when(authenticationService.getAuthenticatedUser()).thenReturn(regularUser);
 
         Account mockAccount = new Account();
         mockAccount.setUsername("user1");
+        mockAccount.setAccountNumber("8888888888");
         when(accountRepository.findByUsername("user1")).thenReturn(Optional.of(mockAccount));
 
         // Act

@@ -45,20 +45,20 @@ class AccountRepositoryTest {
     void findByUsername_ExistingUsername_ReturnsAccount() {
         // Arrange
         Account account = new Account();
-        account.setUsername("user1");
-        account.setAccountNumber("1234567890");
+        account.setUsername("user2");
+        account.setAccountNumber("0987654321");
         account.setBalance(new BigDecimal("1000.00"));
         account.setStatus(Status.ACTIVE);
         entityManager.persist(account);
         entityManager.flush();
 
         // Act
-        Optional<Account> found = accountRepository.findByUsername("user1");
+        Optional<Account> found = accountRepository.findByUsername("user2");
 
         // Assert
         assertTrue(found.isPresent());
-        assertEquals("user1", found.get().getUsername());
-        assertEquals("1234567890", found.get().getAccountNumber());
+        assertEquals("user2", found.get().getUsername());
+        assertEquals("0987654321", found.get().getAccountNumber());
     }
 
     @Test
