@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, dev, basic-auth ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main, dev, basic-auth ]
 
 jobs:
   build:
@@ -22,3 +22,9 @@ jobs:
       run: mvn clean install
     - name: Run tests
       run: mvn test
+    - name: Run application for database initialization
+      run: |
+        mvn spring-boot:run &
+        PID=$!
+        sleep 30
+        kill $PID
